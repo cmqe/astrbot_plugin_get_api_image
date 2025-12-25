@@ -15,8 +15,10 @@ class MyPlugin(Star):
         """插件初始化（可选）。"""
 
     @filter.command("get_img")
-    async def getimg(self, event: AstrMessageEvent):
-        """直接构建 API URL 并发送图片 URL（无需额外处理）。"""
+    async def getimg(self, event: AstrMessageEvent, *args, **kwargs):
+        """直接构建 API URL 并发送图片 URL（无需额外处理）。
+
+        接受可变参数以兼容运行时传入的额外参数。"""
         message_str = event.message_str or ""
 
         # 读取配置中的 api 地址
