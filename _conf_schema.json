@@ -1,0 +1,6 @@
+{
+    "api": {
+        "description": "图片API地址",
+        "type": "string"
+    }
+}
