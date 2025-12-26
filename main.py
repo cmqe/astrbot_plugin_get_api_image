@@ -3,6 +3,7 @@ import aiohttp
 import tempfile
 import os
 import mimetypes
+import asyncio
 
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Star, register
@@ -14,6 +15,16 @@ class MyPlugin(Star):
     def __init__(self, context, config: dict | None = None):
         super().__init__(context)
         self._conf_schema = config
+
+    async def _cleanup_tmp(self, path: str, delay: int = 60):
+        """异步删除临时文件，延迟删除以保证平台有时间读取/上传文件。"""
+        try:
+            await asyncio.sleep(delay)
+            if os.path.exists(path):
+                os.remove(path)
+                logger.info(f"已删除临时图片: {path}")
+        except Exception as e:
+            logger.warning(f"删除临时图片失败: {path} - {e}")
 
     async def initialize(self):
         """插件初始化（可选）。"""
@@ -118,8 +129,13 @@ class MyPlugin(Star):
                             content = await resp.read()
                             tf.write(content)
                             tmp_path = tf.name
-
                         logger.info(f"保存临时图片: {tmp_path}")
+                        # 调度异步删除任务（延迟 60 秒）以防占满磁盘
+                        try:
+                            asyncio.create_task(self._cleanup_tmp(tmp_path, 60))
+                        except Exception:
+                            # 在某些运行环境中 create_task 可能不可用，忽略错误
+                            pass
                         # 发送本地文件路径
                         yield event.image_result(tmp_path)
                         return
