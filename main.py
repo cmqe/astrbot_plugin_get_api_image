@@ -19,7 +19,7 @@ class MyPlugin(Star):
         """插件初始化（可选）。"""
 
     @filter.command("get_img")
-    async def getimg(self, event: AstrMessageEvent, *args, **kwargs):
+    async def getimg(self, event: AstrMessageEvent):
         """调用配置中的 API，处理 JSON 或直接返回的图片二进制并发送。
 
         支持：
